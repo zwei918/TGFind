@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TGFind - Telegram 频道群组导航</title>
+<meta name="description" content="TGFind - Telegram频道群组导航。收录Telegram上的优质频道、群组、机器人，打造高质量导航平台。">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f7;
+  --card: #fff;
+  --text: #333;
+  --muted: #888;
+  --primary: #2a9df4;
+  --border: #eaeaea;
+}
+.dark {
+  --bg: #1a1b1e;
+  --card: #2a2b2e;
+  --text: #e8e8e8;
+  --muted: #999;
+  --primary: #5baeff;
+  --border: #38393c;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+
+/* Top Bar */
+.topbar {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  padding: 0 16px;
+}
+.topbar-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; align-items: center; height: 52px; gap: 12px;
+}
+.logo {
+  font-weight: 700; font-size: 1.1rem; color: var(--primary);
+  text-decoration: none; flex-shrink: 0;
+}
+.logo img { width: 28px; height: 28px; border-radius: 6px; margin-right: 4px; vertical-align: middle; }
+.tabs {
+  display: flex; gap: 4px; flex: 1; overflow-x: auto;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex-shrink: 0; padding: 5px 14px; border-radius: 16px;
+  font-size: .8rem; cursor: pointer; border: 1px solid var(--border);
+  color: var(--muted); background: transparent; transition: .15s;
+  white-space: nowrap; text-decoration: none;
+}
+.tab:hover { background: rgba(42,157,244,.08); color: var(--primary); }
+.tab.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+.dmbtn {
+  width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border);
+  background: none; cursor: pointer; font-size: .95rem; color: var(--text);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+/* Hero */
+.hero {
+  background: linear-gradient(135deg, #1a73e8, #4a90d9);
+  text-align: center; padding: 36px 16px 28px;
+}
+.hero h1 { font-size: 1.5rem; font-weight: 700; color: #fff; }
+.hero p { font-size: .82rem; color: rgba(255,255,255,.7); margin-top: 4px; }
+
+/* Search */
+.search-bar {
+  max-width: 500px; margin: -18px auto 0; padding: 0 16px; position: relative; z-index: 2;
+}
+.search-bar input {
+  width: 100%; height: 42px; border: none; border-radius: 21px;
+  padding: 0 48px 0 18px; font-size: .88rem; background: #fff;
+  box-shadow: 0 4px 16px rgba(0,0,0,.08); color: #333; outline: none;
+}
+.search-bar .sicon {
+  position: absolute; right: 28px; top: 50%; transform: translateY(-50%); color: #999;
+}
+
+/* Stats */
+.stats-row {
+  display: flex; justify-content: center; gap: 28px; padding: 18px 12px 6px;
+}
+.stat { text-align: center; }
+.stat-n { font-size: 1.2rem; font-weight: 700; color: var(--primary); }
+.stat-l { font-size: .68rem; color: var(--muted); }
+
+/* Notice */
+.notice {
+  max-width: 1140px; margin: 0 auto; padding: 0 16px 8px;
+}
+.notice-box {
+  padding: 8px 14px; border-radius: 8px;
+  background: rgba(42,157,244,.06); font-size: .78rem; color: var(--primary);
+}
+.notice-box a { color: var(--primary); font-weight: 600; }
+
+/* Controls */
+.ctrl {
+  max-width: 1140px; margin: 0 auto; padding: 0 16px 8px;
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;
+}
+.ctrl-info { font-size: .78rem; color: var(--muted); }
+.sort-btn {
+  font-size: .72rem; padding: 4px 12px; border-radius: 14px; cursor: pointer;
+  background: transparent; border: 1px solid var(--border); color: var(--muted);
+  transition: .15s;
+}
+.sort-btn:hover, .sort-btn.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+/* Content */
+.content { max-width: 1140px; margin: 0 auto; padding: 0 16px; }
+.sec-title {
+  font-size: .95rem; font-weight: 700; border-bottom: 2px solid var(--primary);
+  padding-bottom: 6px; margin: 18px 0 10px; display: flex; align-items: center; gap: 6px;
+}
+.sec-title .cnt { font-size: .72rem; color: var(--muted); font-weight: 400; margin-left: auto; }
+
+/* Cards */
+.card-row { --bs-gutter-y: 10px; }
+.url-card { }
+.url-body {
+  background: var(--card); border-radius: 10px; border: 1px solid var(--border);
+  padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+  transition: .15s; position: relative; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,.03);
+}
+.url-body:hover { box-shadow: 0 4px 12px rgba(0,0,0,.06); transform: translateY(-1px); }
+.avatar {
+  width: 38px; height: 38px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+  background: #e5e7eb;
+}
+.info { flex: 1; min-width: 0; }
+.info a { text-decoration: none; color: inherit; }
+.name {
+  font-size: .85rem; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.desc {
+  font-size: .72rem; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;
+}
+.tags { margin-top: 4px; display: flex; gap: 4px; flex-wrap: wrap; }
+.tag {
+  font-size: .62rem; padding: 1px 6px; border-radius: 8px;
+  background: rgba(42,157,244,.1); color: var(--primary); white-space: nowrap;
+}
+.arrow {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  width: 26px; height: 26px; border-radius: 50%; background: var(--primary);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: .75rem; opacity: 0; transition: .15s; text-decoration: none;
+}
+.url-body:hover .arrow { opacity: 1; }
+
+/* Footer */
+.footer {
+  max-width: 1140px; margin: 32px auto 0; padding: 16px;
+  text-align: center; font-size: .72rem; color: var(--muted);
+  border-top: 1px solid var(--border);
+}
+.footer a { color: var(--primary); }
+
+/* Empty */
+.empty-state { text-align: center; padding: 48px 16px; color: var(--muted); }
+
+/* Mobile */
+@media (max-width: 640px) {
+  .topbar-inner { height: 46px; gap: 8px; }
+  .logo { font-size: .95rem; }
+  .tab { padding: 4px 8px; font-size: .7rem; }
+  .hero { padding: 28px 12px 20px; }
+  .hero h1 { font-size: 1.2rem; }
+  .hero p { font-size: .75rem; }
+  .search-bar input { height: 38px; font-size: .8rem; }
+  .url-body { padding: 8px 10px; gap: 8px; }
+  .avatar { width: 34px; height: 34px; }
+  .name { font-size: .78rem; }
+  .desc { font-size: .68rem; }
+  .arrow { right: 6px; width: 22px; height: 22px; font-size: .7rem; opacity: 1; }
+  .sec-title { font-size: .85rem; margin: 14px 0 8px; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="logo">TGFind</a>
+    <div class="tabs" id="tabs"></div>
+    <button class="dmbtn" onclick="toggleDark()" title="切换暗色">🌙</button>
+  </div>
+</div>
+
+<div class="hero">
+  <h1>TGFind · Telegram 频道群组导航</h1>
+  <p>收录 Telegram 优质频道、群组、机器人</p>
+</div>
+
+<div class="search-bar">
+  <input type="text" id="searchInput" placeholder="搜索频道、群组、机器人...">
+  <span class="sicon">🔍</span>
+</div>
+
+<div class="stats-row">
+  <div class="stat"><div class="stat-n" id="statC">0</div><div class="stat-l">频道</div></div>
+  <div class="stat"><div class="stat-n" id="statG">0</div><div class="stat-l">群组</div></div>
+  <div class="stat"><div class="stat-n" id="statR">0</div><div class="stat-l">机器人</div></div>
+</div>
+
+<div class="notice">
+  <div class="notice-box">
+    💡 发现更多优质 Telegram 频道 · <a href="https://github.com/zwei918/TGFind" target="_blank">GitHub</a>
+  </div>
+</div>
+
+<div class="ctrl">
+  <span class="ctrl-info" id="ctrlInfo"></span>
+  <div class="d-flex gap-1">
+    <button class="sort-btn on" onclick="setSort('def',this)">默认</button>
+    <button class="sort-btn" onclick="setSort('name',this)">按名称</button>
+  </div>
+</div>
+
+<div class="content" id="content"></div>
+
+<footer class="footer">
+  © 2025 <a href="https://github.com/zwei918/TGFind">TGFind</a> · 内容收集自互联网
+</footer>
+
+<script>
+// ===== DATA =====
+const DATA = [
+  {n:"Newlearnerの自留地",l:"t.me/NewlearnerChannel",d:"不定期推送IT相关资讯，欢迎关注！",c:"科技资讯",t:"channel",g:"科技"},
+  {n:"Yummy",l:"t.me/GodlyNews1",d:"不定期推送科技数码类新资讯",c:"科技资讯",t:"channel",g:"科技"},
+  {n:"科技&趣闻&杂记",l:"t.me/kejiqu",d:"前沿科技资讯，娱乐、影视新闻",c:"科技资讯",t:"channel",g:"科技"},
+  {n:"每日消费电子观察",l:"t.me/CE_Observe",d:"不公正 不客观 不理性",c:"科技资讯",t:"channel",g:"科技"},
+  {n:"科技圈 在花频道",l:"t.me/zaihuanews",d:"日常推送科技新闻和互动消息",c:"科技资讯",t:"channel",g:"新闻"},
+  {n:"风向旗参考快讯",l:"t.me/xhqcankao",d:"互联网科技新闻快讯",c:"科技资讯",t:"channel",g:"新闻"},
+  {n:"Solidot",l:"t.me/solidot",d:"solidot.org非官方RSS推送频道",c:"科技资讯",t:"channel",g:"科技"},
+  {n:"少数派sspai",l:"t.me/sspai",d:"少数派(sspai.com)官方频道",c:"科技资讯",t:"channel",g:"科技"},
+  {n:"科技圈的日常",l:"t.me/misakatech",d:"科技圈内的大事小事",c:"科技资讯",t:"channel",g:"科技"},
+  {n:"蓝点网订阅频道",l:"t.me/landiansub",d:"蓝点网订阅频道",c:"科技资讯",t:"channel",g:"科技"},
+  {n:"APPDO数字生活指南",l:"t.me/AppDoDo",d:"互联网/数码/App/数字指南",c:"科技资讯",t:"channel",g:"数码"},
+  {n:"开源社区",l:"t.me/opencfdchannel",d:"Android/Linux/Windows/MacOS/iOS",c:"科技资讯",t:"channel",g:"开源"},
+  {n:"不良林",l:"t.me/buliang00",d:"科学上网，资源分享",c:"科技资讯",t:"channel",g:"翻墙"},
+  {n:"华尔街见闻",l:"t.me/FinanceNewsDaily",d:"实时推送华尔街见闻财经资讯",c:"媒体资讯",t:"channel",g:"财经"},
+  {n:"竹新社",l:"t.me/tnews365",d:"7×24编译国内外即时新闻报道",c:"媒体资讯",t:"channel",g:"新闻"},
+  {n:"财经慢报",l:"t.me/Financial_Express",d:"泛财经类资讯新闻频道",c:"媒体资讯",t:"channel",g:"财经"},
+  {n:"每天60秒简报",l:"t.me/NEWSPJAPK",d:"新闻简报 热点时事 数码科技",c:"媒体资讯",t:"channel",g:"新闻"},
+  {n:"音乐收藏夹",l:"t.me/flac_file",d:"无损音乐收藏频道，不定时更新",c:"影视音乐",t:"channel",g:"音乐"},
+  {n:"TVBox",l:"t.me/TVbox888",d:"只做一件事，解放你的电视",c:"影视音乐",t:"channel",g:"影视"},
+  {n:"奥斯卡4K蓝光影视",l:"t.me/Oscar_4Kmovies",d:"电影资讯及高质量电影资源",c:"影视音乐",t:"channel",g:"影视"},
+  {n:"阿里云盘4K影视",l:"t.me/Aliyun_4K_Movies",d:"专注于高品质4K REMUX影视",c:"影视音乐",t:"channel",g:"影视"},
+  {n:"阿里云盘资源",l:"t.me/zaihuayun",d:"阿里云盘资源分享频道",c:"影视音乐",t:"channel",g:"资源"},
+  {n:"NEP.Anime 动画仓库",l:"t.me/AnimeNep",d:"动画仓库(简/繁/日)",c:"影视音乐",t:"channel",g:"动漫"},
+  {n:"音乐云",l:"t.me/Mp3_999",d:"音乐分享在线听",c:"影视音乐",t:"channel",g:"音乐"},
+  {n:"Emby公益指北",l:"t.me/FreeEmbyGuide",d:"分享混迹Emby公益服的心得",c:"影视音乐",t:"channel",g:"影视"},
+  {n:"SomeACG 每日壁纸",l:"t.me/SomeACG",d:"全TG质量最高的ACG壁纸频道",c:"壁纸美图",t:"channel",g:"ACG"},
+  {n:"ANIME壁纸",l:"t.me/acgwallpaper",d:"壁纸每天更新一次",c:"壁纸美图",t:"channel",g:"壁纸"},
+  {n:"公诸同好",l:"t.me/gongzhutonghao",d:"高质量动漫&二次元&插画作品",c:"壁纸美图",t:"channel",g:"ACG"},
+  {n:"PIXIV站每日Top50",l:"t.me/pixiv_top50",d:"搬运PIXIV每天排行榜前50",c:"壁纸美图",t:"channel",g:"Pixiv"},
+  {n:"Miku Art",l:"t.me/MikuArt",d:"Twitter&Pixiv上的ACG图",c:"壁纸美图",t:"channel",g:"ACG"},
+  {n:"NewlearnerのIT社群",l:"t.me/NewlearnerGroup",d:"以IT话题为主的交流群",c:"社区交流",t:"group",g:"IT"},
+  {n:"机场交流群",l:"t.me/jichang_user",d:"机场交流群 | 吃瓜群众",c:"社区交流",t:"group",g:"机场"},
+  {n:"ChatGPT AI",l:"t.me/gpt_user",d:"ChatGPT AI使用交流讨论",c:"社区交流",t:"group",g:"AI"},
+  {n:"期货与期权",l:"t.me/CNderivatives",d:"电报第一大中文金融交易讨论群",c:"社区交流",t:"group",g:"金融"},
+  {n:"V2EX交流群",l:"t.me/V2EXPro",d:"程序员、分享创造、问与答",c:"编程开发",t:"group",g:"技术"},
+  {n:"Go",l:"t.me/GolangCN",d:"Go语言中文交流群",c:"编程开发",t:"group",g:"编程"},
+  {n:"Docker",l:"t.me/dockertutorial",d:"Docker学习|交流|分享",c:"编程开发",t:"group",g:"技术"},
+  {n:"Python中文交流",l:"t.me/pythonzh",d:"分享心得，共同进步",c:"编程开发",t:"group",g:"编程"},
+  {n:"V2EX后花园v2.0",l:"t.me/goV2EX",d:"专注技术和侃大山",c:"编程开发",t:"group",g:"技术"},
+  {n:"Apple TV",l:"t.me/AppleTVPlus",d:"Apple TV用户交流群",c:"数码科技",t:"group",g:"数码"},
+  {n:"Quantumult X",l:"t.me/QuanXApp",d:"Quantumult X交流群",c:"软件工具",t:"group",g:"翻墙"},
+  {n:"Surge交流",l:"t.me/loveapps",d:"Surge使用交流分享",c:"软件工具",t:"group",g:"翻墙"},
+  {n:"Loon-0x00",l:"t.me/Loon0x00",d:"Loon的官方群组",c:"软件工具",t:"group",g:"翻墙"},
+  {n:"合租社群",l:"t.me/hezu1",d:"Netflix|YouTube|Spotify合租",c:"资源分享",t:"group",g:"合租"},
+  {n:"Steam快讯",l:"t.me/steamsteam",d:"Steam快讯",c:"游戏专区",t:"channel",g:"游戏"},
+  {n:"电脑单机游戏破解",l:"t.me/steampj",d:"各种单机破解游戏分享",c:"游戏专区",t:"channel",g:"游戏"},
+  {n:"热门游戏资源",l:"t.me/aipojujlb",d:"分享热门的游戏",c:"游戏专区",t:"channel",g:"游戏"},
+  {n:"TGwiki",l:"tgnav.github.io/tgwiki",d:"高质量Telegram知识库",c:"电报入门",t:"link",g:"教程"},
+  {n:"TG资源工具箱",l:"t.me/sogo333",d:"频道、群组、电影、软件、资讯",c:"电报入门",t:"channel",g:"工具"},
+  {n:"BotFather",l:"t.me/BotFather",d:"创建机器人，管理机器人(官方)",c:"常用机器人",t:"robot",g:"官方"},
+  {n:"LivegramBot",l:"t.me/LivegramBot",d:"创建属于自己的双向私聊机器人",c:"常用机器人",t:"robot",g:"工具"},
+  {n:"SearcheeBot",l:"t.me/SearcheeBot",d:"TG频道搜索机器人",c:"常用机器人",t:"robot",g:"搜索"},
+  {n:"RustRssBot",l:"t.me/RustRssBot",d:"中文Telegram RSS机器人",c:"常用机器人",t:"robot",g:"RSS"},
+  {n:"DropmailBot",l:"t.me/DropmailBot",d:"创建临时邮箱，保护隐私",c:"常用机器人",t:"robot",g:"工具"},
+  {n:"TGStat Bot",l:"t.me/TGStat_Bot",d:"TGStat数据分析机器人",c:"常用机器人",t:"robot",g:"分析"},
+  {n:"Policr Mini",l:"t.me/policr_mini_bot",d:"全新设计的Policr迷你版群管",c:"常用机器人",t:"robot",g:"群管"},
+  {n:"KTagbot",l:"t.me/KTagbot",d:"贴纸收藏夹",c:"常用机器人",t:"robot",g:"贴纸"},
+];
+
+const CATS = ["全部", ...new Set(DATA.map(d=>d.c))];
+let curCat = "全部", curSort = "default", query = "";
+
+function flt() {
+  let it = [...DATA];
+  if (curCat !== "全部") it = it.filter(d => d.c === curCat);
+  if (query) {
+    const q = query.toLowerCase();
+    it = it.filter(d => d.n.toLowerCase().includes(q) || d.d.toLowerCase().includes(q) || d.g.toLowerCase().includes(q));
+  }
+  if (curSort === "name") it.sort((a,b) => a.n.localeCompare(b.n, "zh-CN"));
+  return it;
+}
+
+function grp(it) {
+  const g = {};
+  it.forEach(i => { if (!g[i.c]) g[i.c] = []; g[i.c].push(i); });
+  return g;
+}
+
+function esc(s) {
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function tb(t) {
+  if (t === "channel") return "📢 频道";
+  if (t === "group") return "👥 群组";
+  if (t === "robot") return "🤖 机器人";
+  return "🔗 链接";
+}
+
+function renderTabs() {
+  document.getElementById("tabs").innerHTML = CATS.map(c => {
+    const n = c === "全部" ? DATA.length : DATA.filter(d => d.c === c).length;
+    return `<span class="tab${c === curCat ? " on" : ""}" onclick="selectCat('${c}')">${c} ${n}</span>`;
+  }).join("");
+}
+
+function renderContent() {
+  const it = flt(), gd = grp(it);
+  document.getElementById("ctrlInfo").textContent = `共 ${it.length} 个`;
+  document.getElementById("statC").textContent = DATA.filter(d => d.t === "channel").length;
+  document.getElementById("statG").textContent = DATA.filter(d => d.t === "group").length;
+  document.getElementById("statR").textContent = DATA.filter(d => d.t === "robot").length;
+
+  if (!it.length) {
+    document.getElementById("content").innerHTML = '<div class="empty-state"><p>没有匹配的结果</p></div>';
+    return;
+  }
+
+  let html = "";
+  for (const [c, items] of Object.entries(gd)) {
+    html += `<div class="sec-title">📌 ${c}<span class="cnt">${items.length} 个</span></div><div class="row card-row">`;
+    items.forEach(x => {
+      const av = `https://t.me/i/userpic/160/${x.l.replace(/^t\.me\//, "")}.jpg`;
+      const href = x.l.startsWith("t.me/") ? `https://${x.l}` : `https://t.me/${x.l}`;
+      html += `<div class="col-6 col-md-4 col-lg-3"><div class="url-body">
+        <img class="avatar" src="${av}" loading="lazy" onerror="this.style.display='none'" alt="">
+        <div class="info">
+          <a href="${href}" target="_blank" rel="nofollow"><div class="name">${esc(x.n)}</div></a>
+          <div class="desc">${esc(x.d)}</div>
+          <div class="tags"><span class="tag">${tb(x.t)}</span><span class="tag">${x.g}</span></div>
+        </div>
+        <a class="arrow" href="${href}" target="_blank" rel="nofollow">➤</a>
+      </div></div>`;
+    });
+    html += `</div>`;
+  }
+  document.getElementById("content").innerHTML = html;
+}
+
+function selectCat(c) {
+  curCat = c;
+  renderTabs();
+  renderContent();
+  window.scrollTo({ top: 240, behavior: "smooth" });
+}
+
+function setSort(s, b) {
+  curSort = s;
+  document.querySelectorAll(".sort-btn").forEach(x => x.classList.remove("on"));
+  b.classList.add("on");
+  renderContent();
+}
+
+function toggleDark() {
+  document.body.classList.toggle("dark");
+  const d = document.body.classList.contains("dark");
+  document.querySelector(".dmbtn").textContent = d ? "☀️" : "🌙";
+  localStorage.setItem("tgfind-dark", d ? "1" : "0");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (localStorage.getItem("tgfind-dark") === "1") {
+    document.body.classList.add("dark");
+    document.querySelector(".dmbtn").textContent = "☀️";
+  }
+  renderTabs();
+  renderContent();
+
+  document.getElementById("searchInput").addEventListener("input", function() {
+    query = this.value.trim();
+    renderContent();
+  });
+});
+</script>
+</body>
+</html>
