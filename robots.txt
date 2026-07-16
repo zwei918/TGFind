@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.tgnav.org/sitemap.xml
+Sitemap: https://www.tgfind.org/sitemap.xml
